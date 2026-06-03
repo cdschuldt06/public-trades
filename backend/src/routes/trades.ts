@@ -1,15 +1,10 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma";
+import { getAllTrades } from "../services/tradeService";
 
 const router = Router();
 
 router.get("/", async (_req, res) => {
-  const trades = await prisma.trade.findMany({
-    include: {
-      politician: true,
-      ticker: true,
-    },
-  });
+  const trades = await getAllTrades();
 
   res.json(trades);
 });

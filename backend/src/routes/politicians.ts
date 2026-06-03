@@ -1,10 +1,13 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma";
+import {
+  getAllPoliticians,
+  getPoliticianById,
+} from "../services/politicianService";
 
 const router = Router();
 
 router.get("/", async (_req, res) => {
-  const politicians = await prisma.politician.findMany();
+  const politicians = await getAllPoliticians();
 
   res.json(politicians);
 });
@@ -16,16 +19,7 @@ router.get("/:id", async (req, res) => {
     return res.status(400).json({ error: "Invalid politician ID" });
   }
 
-  const politician = await prisma.politician.findUnique({
-    where: { id },
-    include: {
-      trades: {
-        include: {
-          ticker: true,
-        },
-      },
-    },
-  });
+  const politician = await getPoliticianById(id);
 
   if (!politician) {
     return res.status(404).json({ error: "Politician not found" });
