@@ -29,3 +29,14 @@ Portfolio simulator excluded from MVP.
 
 Reason:
 Focus on trade tracking foundation first.
+
+### Database Hosting
+
+Decision:
+Use a local PostgreSQL instance during development.
+
+Reason:
+Simplifies learning and local development while avoiding cloud infrastructure setup during the MVP phase.
+
+Future Plan:
+Migrate to a hosted PostgreSQL provider (likely Neon) before deployment. The application will use environment variables and Prisma to ensure the migration requires minimal code changes.
