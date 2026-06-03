@@ -1,12 +1,18 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { TradesService } from './services/trades.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('frontend');
+  private tradesService = inject(TradesService);
+
+  constructor() {
+    this.tradesService.getTrades().subscribe((trades) => {
+      console.log(trades);
+    });
+  }
 }

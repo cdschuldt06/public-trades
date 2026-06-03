@@ -1,9 +1,12 @@
+import cors from "cors";
+
 import express from "express";
 
 import tradesRouter from "./routes/trades";
 import politiciansRouter from "./routes/politicians";
 
 const app = express();
+app.use(cors());
 const port = 3000;
 
 app.get("/health", (_req, res) => {
