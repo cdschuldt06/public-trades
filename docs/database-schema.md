@@ -56,3 +56,25 @@ A Ticker can have many Trades.
 Each Trade belongs to exactly one Politician.
 
 Each Trade belongs to exactly one Ticker.
+
+## Keys
+
+### Politician
+Primary Key:
+- id
+
+### Ticker
+Primary Key:
+- id
+
+### Trade
+Primary Key:
+- id
+
+Foreign Keys:
+- politician_id -> Politician.id
+- ticker_id -> Ticker.id
+
+### ImportJob
+Primary Key:
+- id
