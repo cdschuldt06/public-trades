@@ -1,22 +1,20 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { TradesService } from './services/trades.service';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   private tradesService = inject(TradesService);
 
-  trades: any[] = [];
+  trades = signal<any[]>([]);
 
-    constructor() {
+  constructor() {
     this.tradesService.getTrades().subscribe((trades: any) => {
-      console.log("Trades loaded:", trades);
-      this.trades = trades;
+      this.trades.set(trades);
     });
   }
 }

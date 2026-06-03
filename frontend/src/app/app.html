@@ -17,15 +17,15 @@
   </thead>
 
   <tbody>
-    @for (trade of trades; track trade.id) {
-      <tr>
-        <td>{{ trade.politician.firstName }} {{ trade.politician.lastName }}</td>
-        <td>{{ trade.ticker.symbol }}</td>
-        <td>{{ trade.transactionType }}</td>
-        <td>${{ trade.amountMin }} - ${{ trade.amountMax }}</td>
-        <td>{{ trade.transactionDate }}</td>
-        <td>{{ trade.disclosureDate }}</td>
-      </tr>
-    }
-  </tbody>
+  @for (trade of trades(); track trade.id) {
+    <tr>
+      <td>{{ trade.politician.firstName }} {{ trade.politician.lastName }}</td>
+      <td>{{ trade.ticker.symbol }}</td>
+      <td>{{ trade.transactionType }}</td>
+      <td>${{ trade.amountMin }} - ${{ trade.amountMax }}</td>
+      <td>{{ trade.transactionDate }}</td>
+      <td>{{ trade.disclosureDate }}</td>
+    </tr>
+  }
+</tbody>
 </table>

@@ -14,16 +14,29 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   for (const politician of politicians) {
-    await prisma.politician.create({
-      data: politician,
-    });
+    await prisma.politician.upsert({
+  where: {
+    firstName_lastName: {
+      firstName: politician.firstName,
+      lastName: politician.lastName,
+    },
+  },
+  update: politician,
+  create: politician,
+});
   }
 
   for (const ticker of tickers) {
-    await prisma.ticker.create({
-      data: ticker,
-    });
+    await prisma.ticker.upsert({
+  where: {
+    symbol: ticker.symbol,
+  },
+  update: ticker,
+  create: ticker,
+});
   }
+
+  await prisma.trade.deleteMany();
 
   for (const trade of trades) {
     const politician = await prisma.politician.findFirstOrThrow({
