@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Politician {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  party     String
+  state     String
+  chamber   String
+  trades    Trade[]
+}
+
+model Ticker {
+  id       Int     @id @default(autoincrement())
+  symbol   String  @unique
+  name     String
+  exchange String?
+  trades   Trade[]
+}
+
+model Trade {
+  id              Int        @id @default(autoincrement())
+  politicianId    Int
+  tickerId        Int
+  transactionType String
+  amountMin       Int
+  amountMax       Int
+  transactionDate DateTime
+  disclosureDate  DateTime
+
+  politician Politician @relation(fields: [politicianId], references: [id])
+  ticker     Ticker     @relation(fields: [tickerId], references: [id])
+}
+
+model ImportJob {
+  id              Int      @id @default(autoincrement())
+  source          String
+  importedAt      DateTime @default(now())
+  status          String
+  recordsImported Int
+}
