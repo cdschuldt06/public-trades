@@ -1,9 +1,10 @@
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { TradesService } from './services/trades.service';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [CurrencyPipe, DatePipe],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
