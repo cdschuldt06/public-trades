@@ -1,9 +1,13 @@
+import { QuiverProvider } from "../providers/quiverProvider";
+
 import "dotenv/config";
 
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { importTrades } from "../ingestion/tradeImporter";
-import { fetchGovTrades } from "../fetchers/senateTradesFetcher";
+
+const normalize = (str: string) =>
+  str.toLowerCase().replace(/\s+/g, " ").trim();
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -12,22 +16,33 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const rawTrades = await fetchGovTrades();
+    const provider = new QuiverProvider();
+    const rawTrades = await provider.fetchTrades();
 
-  const politicians = await prisma.politician.findMany();
-  const tickers = await prisma.ticker.findMany();
 
-  const mappedTrades = rawTrades.map((trade) => {
+    if (!rawTrades.length) {
+        throw new Error("No trades parsed from government file");
+    }
+
+    const politicians = await prisma.politician.findMany();
+    const tickers = await prisma.ticker.findMany();
+    const mappedTrades = rawTrades
+  .map((trade) => {
     const politician = politicians.find(
-      (p) => `${p.firstName} ${p.lastName}` === trade.politicianName
+      (p) =>
+        normalize(`${p.firstName} ${p.lastName}`) ===
+        normalize(trade.politicianName)
     );
 
-    const ticker = tickers.find((t) => t.symbol === trade.ticker);
+    const ticker = tickers.find(
+      (t) => normalize(t.symbol) === normalize(trade.ticker)
+    );
 
     if (!politician || !ticker) {
-      throw new Error(
-        `Missing match for ${trade.politicianName} or ${trade.ticker}`
+      console.warn(
+        `Skipping trade: ${trade.politicianName} / ${trade.ticker}`
       );
+      return null;
     }
 
     return {
@@ -39,8 +54,18 @@ async function main() {
       transactionDate: trade.transactionDate,
       disclosureDate: trade.disclosureDate,
     };
-  });
-
+  })
+  .filter(
+    (t): t is {
+      politicianId: number;
+      tickerId: number;
+      transactionType: string;
+      amountMin: number;
+      amountMax: number;
+      transactionDate: Date;
+      disclosureDate: Date;
+    } => t !== null
+  );
   await importTrades(prisma, mappedTrades);
 
   console.log("Government data imported successfully");
