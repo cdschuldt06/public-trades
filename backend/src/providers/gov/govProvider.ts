@@ -52,7 +52,26 @@ export class GovProvider implements TradeProvider {
     console.log(text.slice(0, 1500));
     console.log("===== SENATE RAW RESPONSE END =====");
 
-    return [];
+    const json = JSON.parse(text);
+
+    return json.data.map((row: any) => {
+        const firstName = row[0];
+        const lastName = row[1];
+        const linkHtml = row[3];
+        const docId = linkHtml.match(/\/view\/(.*?)\//)?.[1];
+        const date = row[4];
+
+        return {
+            politicianName: `${firstName} ${lastName}`,
+            ticker: "UNKNOWN",
+            transactionType: "UNKNOWN",
+            amountMin: 0,
+            amountMax: 0,
+            transactionDate: new Date(date),
+            disclosureDate: new Date(date),
+            docId,
+        };
+    });
     
   }
 
