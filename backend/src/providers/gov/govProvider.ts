@@ -5,6 +5,7 @@ import { CookieJar } from "tough-cookie";
 
 const jar = new CookieJar();
 const fetchWithCookies = fetchCookie(fetch, jar);
+let csrfToken: string | undefined;
 
 export class GovProvider implements TradeProvider {
   async fetchTrades(): Promise<RawGovTrade[]> {
@@ -29,33 +30,30 @@ export class GovProvider implements TradeProvider {
     form.append("filer_types", "[1]");
     form.append("submitted_start_date", "01/01/2012 00:00:00");
 
+    await fetchWithCookies("https://efdsearch.senate.gov/search/home/");
+    const cookies = await jar.getCookies("https://efdsearch.senate.gov");
+        csrfToken = cookies.find(c => c.key === "csrftoken")?.value;
+
     const res = await fetchWithCookies(url, {
-      method: "POST",
-      headers: {
+    method: "POST",
+    headers: {
         "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
         "x-requested-with": "XMLHttpRequest",
-        "x-csrftoken": process.env.SENATE_CSRF_TOKEN ?? "",
-      },
-      body: form.toString(),
+        "x-csrftoken": csrfToken ?? "",
+        "referer": "https://efdsearch.senate.gov/search/",
+    },
+    body: form.toString(),
     });
 
     // IMPORTANT: debug safety
     const text = await res.text();
 
-    // Try parsing safely
-    let data: any;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.log("Non-JSON response received (first 500 chars):");
-      console.log(text.slice(0, 500));
-      throw new Error("Senate endpoint did not return JSON (session/auth issue likely)");
-    }
+    console.log("===== SENATE RAW RESPONSE START =====");
+    console.log(text.slice(0, 1500));
+    console.log("===== SENATE RAW RESPONSE END =====");
 
-    console.log("Senate rows returned count:", data?.data?.length);
-    console.log("Sample row:", data?.data?.[0]);
-
-    return data?.data ?? [];
+    return [];
+    
   }
 
   private async fetchHouse(): Promise<RawGovTrade[]> {
