@@ -1,4 +1,7 @@
+import { importTrades } from "../src/ingestion/tradeImporter";
+
 import "dotenv/config";
+
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -38,31 +41,29 @@ async function main() {
 
   await prisma.trade.deleteMany();
 
-  for (const trade of trades) {
-    const politician = await prisma.politician.findFirstOrThrow({
-      where: {
-        lastName: trade.politicianLastName,
-      },
-    });
+  const mappedTrades = [];
 
-    const ticker = await prisma.ticker.findUniqueOrThrow({
-      where: {
-        symbol: trade.tickerSymbol,
-      },
-    });
+for (const trade of trades) {
+  const politician = await prisma.politician.findFirstOrThrow({
+    where: { lastName: trade.politicianLastName },
+  });
 
-    await prisma.trade.create({
-      data: {
-        politicianId: politician.id,
-        tickerId: ticker.id,
-        transactionType: trade.transactionType,
-        amountMin: trade.amountMin,
-        amountMax: trade.amountMax,
-        transactionDate: trade.transactionDate,
-        disclosureDate: trade.disclosureDate,
-      },
-    });
-  }
+  const ticker = await prisma.ticker.findUniqueOrThrow({
+    where: { symbol: trade.tickerSymbol },
+  });
+
+  mappedTrades.push({
+    politicianId: politician.id,
+    tickerId: ticker.id,
+    transactionType: trade.transactionType,
+    amountMin: trade.amountMin,
+    amountMax: trade.amountMax,
+    transactionDate: trade.transactionDate,
+    disclosureDate: trade.disclosureDate,
+  });
+}
+
+await importTrades(prisma, mappedTrades);
 
   console.log("Database seeded successfully");
 }
