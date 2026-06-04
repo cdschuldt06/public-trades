@@ -1,4 +1,4 @@
-import { TradeProvider, RawGovTrade } from "./tradeProvider";
+import { TradeProvider, RawGovTrade } from "../tradeProvider";
 
 export class QuiverProvider implements TradeProvider {
   private apiKey = process.env.QUIVER_API_KEY;
